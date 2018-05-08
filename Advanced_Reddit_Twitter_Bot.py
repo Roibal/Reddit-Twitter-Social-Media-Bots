@@ -1,13 +1,14 @@
 """
 
-The purpose of this python script is to create a Twitter Bot using Tweepy.
+The purpose of this python script (Bot) is to create a Twitter Bot using Tweepy.
+Also Interacts on Reddit to promote links, gain Karma
 The Twitter Bot will like, repost and follow accounts related to cryptocurrencies (Bitcoin, Ethereum and Steem) and
 Political Twitter Accounts
 
 Created January 19, 2018
+Modified May 5, 2018
 
 Copyright 2018 Joaquin Roibal
-
 """
 
 #import dependencies - tweepy for twitter - praw for reddit
@@ -16,7 +17,7 @@ import time
 import random
 import praw
 from samplekeys import keys, keys2, keys3
-
+"""
 list_of_accts = [keys, keys2, keys3]
 #Oauth consumer key/secret and token/secret from twitter application
 consumer_key = keys3['consumer_key']
@@ -31,115 +32,79 @@ auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
 #Create Reddit Bot with login and private key - username - password
-bot = praw.Reddit(user_agent='Post_bot1 v0.1', client_id='', client_secret='',
+bot = praw.Reddit(user_agent='Post_bot1 v0.2', client_id='', client_secret='',
     username='', password='')
-
+"""
 def run():
+    print("-------------------------------------------")
+    print("Initializing Advanced Reddit/Twitter Bot - Loading Lists of Accounts/URL's\n")
+    try:
+        #Create List of Subreddits to source content
+        subreddit_list = read_file('Subreddits_List.txt') #Load List from Text File which will be used for Subreddits
+        print("Subreddit List: ", subreddit_list)
+        #create 'whitelisted' words for cryptocurrency & Business/Politics
+        crypto_words = read_file('Crypto_Words_List.txt')
+        print("Crypto Words: ", crypto_words)
+        biz_word_list = read_file('Biz_Words_List.txt')
+        print("Biz Word List: ", biz_word_list)
+        #Create Lists of Popular Twitter Accounts to Follow, Retweet, Favorite (Interact)
+        pop_users = read_file('Popular_Twitter_List.txt')
+        print("Popular Users: ", pop_users)
+        #Create 'Blacklist' of Twitter Accounts
+        accts_unfollow_list = read_file('Unfollow_Twitter_List.txt')
+        print("Accounts Unfollow List: ", accts_unfollow_list)
+        #Create List of Cryptocurrency/Blockchain Related Accounts
+        crypto_user_list = read_file('Crypto_User_List.txt')
+        print("Crypto User List: ", crypto_user_list)
+        #Create List of URL's to Promote
+        blog_url_list = read_file('Blog_URL_List.txt')
+        print("Blog URL List: ", blog_url_list)
+        #print(api.rate_limit_status())
+        number_fav = 5
+        num_to_follow = 3
 
-    #Create List of Subreddits to source content
-    subreddit_crypto_list = ['Bitcoin', 'Cryptocurrency', 'Ethereum', 'Ripple', 'CryptoTraderNetwork']
-    sub_post_list = ['Bitcoin', 'CryptocurrencyTrading', 'BitcoinMarkets', 'CryptoTraderNetwork', 'Cryptotrader', 'Cryptomarkets', 'Crypto_currency_News', 'cryptocurrencies', 'altcoin']
-    subreddit_crypto_list += sub_post_list
-    #Create New List, to add people who will then be used to follow new accounts
-    #api.create_list(name='Current News', description='Best Accounts on Twitter for News')
-
-    #create 'whitelisted' words for cryptocurrency
-    crypto_words = ['Bitcoin', 'Blockchain', 'Ethereum', 'BTC', 'ETH', 'Cryptocurrency', 'Crypto', 'Cryptocurrencies',
-                    'BlockchainTechnology', 'cryptomarkets', 'cryptotrading', 'BlockchainEngineering', 'Tokens', 'InvestInCrypto',
-                    'InvestInBlockchain', 'CryptoTraders', 'CryptoTraderBot']
-    biz_word_list = ['Business', 'Politics', 'Technology', 'Tech']
-    abq_list = ['ewhitmore', 'MayorKeller', 'cabq', 'kindpirates', 'CVF_NewMexico', 'swsantafe', 'goabqid',
-                'RepLujanGrisham', 'SenatorTomUdall', 'KUNMNews', 'UNM', 'NMSenateDems']
-    user_list_2 = ['AlexisGirlNovak', 'hardball', 'TheEllenShow', 'ESPN', 'NBA', 'Warriors',
-                   'ViceNews', 'CNN', 'AntDavis23', 'boogiecousins', 'SenSanders', 'SInow', 'CBSNews', 'bpopken',
-                   'MSNBC', 'espn', 'SRuhle', 'JoyAnnReid', 'Lawrence', 'maddow', 'kasie', 'AliVelshi', 'ABC', 'APPolitics',
-                   'CoinDesk', 'BitcoinMagazine', 'FEhrsam', 'NFL', 'SenSchumer', 'AdamSchiffCA', 'USATODAY', 'JoeNBC', 'NBATV',
-                   'AyyDubs', 'SportsCenter', 'SC_ESPN', 'CNBC', 'RevJJackson', 'RealBillRussell', 'SusanSarandon',
-                   'tictoc', 'KobeBryant', 'CBSNews', 'ABC', 'HermEdwards', 'katiecouric', 'ObamaFoundation', 'StephenAtHome',
-                   'WashingtonPost', 'MariaTeresa1']
-    accts_unfollow_list = ['TwitterSupport', 'FoxNews', 'NRA', 'realDonaldTrump', 'DevinNunes', 'CBP', 'PrisonPlanet',
-                           'VitalikButerin', 'chiefynduom', 'BreitbartNews', 'RT_News', 'Musically', 'TwitterMoments',
-                           'TaiLopez', 'ProductHunt', 'Lawrence', 'blockchaindaisy']
-    crypto_user_list = ['CryptoCobain', 'Cryptopathic', 'CryptOrca', 'Crypto_God', 'piggydeveloper', 'VentureCoinist',
-                        'ThinkingUSD', 'caneofc', 'joezabb', 'CryptoCred', 'CommunityFundCC', 'dr_hodes', 'cryptomocho',
-                        'Coin_Shark', 'SilverBulletBTC', 'crypto_rand', 'CryptoBanger', 'anambroid', 'cryptomickey',
-                        'cz_binance', 'VitalikButerin', 'cointelegraph', 'aantonop', 'CryptoChoe', 'surfcoderepeat',
-                        'cryptoallstarz', 'nondualnelly', 'coinyeezy', 'naval', 'AriDavidPaul', 'SatoshiLite',
-                        'fluffypony', 'CryptoBully', 'notsofast', 'CryptoMessiah', 'cryptodemedici', 'needacoin',
-                        'Bitfinexed', 'CryptoHustle', 'NeerajKA', 'missNatoshi', 'Crypto_Bitlord', 'loomnetwork',
-                        'DecentralizedTV', 'CryptoKitties', 'jeffehh', 'whalepool', 'whalecryptogirl', 'arrington', 'ricburton',
-                        'cryptoecongames', 'mindandtrading', '_tm3k', 'dwaltchack', 'VinnyVo44', 'velvet_campbell',
-                        'AmandaGutterman', 'EtherealSummit', '2Sumeet', 'BlockChannel', 'Ossettia', 'justinsuntron',
-                        'EvaBeylin', 'saifedean', 'annairrera', 'BITQueen_BR', 'Pacoiin', 'nondualrandy']
-    blockchain_usr_list = ['StewartEsq', 'WallerMaDev', 'AppletonDave', 'PdqJones', 'Obale', 'KristovAtlas', 'jrbedard',
-                           'sbetamc', 'jeremyalmond', 'Logvinov_Leon', 'iam_preethi', 'uzyn', 'NickSzabo4', 'EthereumDenver',
-                           'bc_workshop', 'thebc_connector', 'PropyInc', 'ngladkikh', 'JimmySong', 'daostack',
-                           'blockchaincap', 'ShapeShift_io', 'metamask_io', 'LeValleyKelly', 'davidlknott', 'BlockchainCTR',
-                           'EthereumNetw', 'IBMBlockchain', 'IBMBlockchain', 'UCLA_Blockchain', 'BlockchainCTR', 'BlockchainInfos', 'ChainDynamics',
-                           'CarrascosaCris_', 'BlockchainEDU', 'bc_workshop', 'iurimatias', 'atxblockcollect', 'crypto', 'Women4Blockcha1',
-                           'BlockchainUG', 'cryptradr', 'TheReal_Wolf_', 'vergecurrency', 'tronfoundation']
-    num_to_fav=5
-    blog_url_list = ['http://www.medium.com/@BlockchainEng',
-                     'https://t.co/IdDTdtSBOi',
-                     'https://t.co/O0GCmlgLwT', 'https://www.youtube.com/watch?v=Y4RwD1OGz4c',
-                     'https://www.youtube.com/watch?v=pjLzJcj3kV0']
-    print(api.rate_limit_status())
-    number_fav = 5
-    num_to_follow = 3
-    crypto2_user_list = blockchain_usr_list + crypto_user_list
-    crypto_user_list = blockchain_usr_list + crypto_user_list + user_list_2 +abq_list
-    crosspost_title_list = []
-    usr_list = ['BlockchainEng']
-    while 1:
-        bit_url_list=[]
-        #favorite(crypto2_user_list, 4, accts_unfollow_list)
-        #Calls all functions (favorite/RT/Follow/Post)
+        usr_list = ['BlockchainEng']        #Enter Twitter Account to Promote
+        print("\n\nSuccessfully Loaded Accounts & URL's. Continuing to Bot Functionality.\n\n")
+    except:
+        print("Loading of Accounts & URL's Failed")
+    while 0:
+        #Infinite Loop which Calls all functions (favorite/RT/Follow/Post)
         print("-------------------------------------------------------\nStarting Roibal Crypto Bot \n\n\n")
-        try:
-            source_urls_reddit(subreddit_crypto_list, bit_url_list)
-            #repost to Reddit
-            xpost_reddit(crypto_words, crosspost_title_list, sub_post_list, blog_url_list)
-            time.sleep(random.randint(15, 360))
-            post_twitter(bit_url_list, biz_word_list, crypto_words, crypto2_user_list)
-            time.sleep(random.randint(10,120))
-            #Through each infinite loop post crypto-related post from Reddit
-            if len(bit_url_list)>0 and random.randint(0,100)<30:
-                favorite(crypto_user_list, num_to_fav, accts_unfollow_list)
-                post_twitter(bit_url_list, biz_word_list, crypto_words, crypto2_user_list)
-                print("Tweeted!")
-        except:
-            pass
+        bit_url_list=[]
+        crosspost_title_list = []
 
         try:
-            if random.randint(0,100)<8:
-                crypto_follow(crypto_words, crypto2_user_list)
+            source_urls_reddit(subreddit_list, bit_url_list)
+            #Crosspost to Reddit
+            xpost_reddit(crypto_words, crosspost_title_list, subreddit_list, blog_url_list)
+            favorite(crypto_user_list, number_fav, accts_unfollow_list)
+            fav_rt_timeline_tweets(usr_list, crypto_words, accts_unfollow_list, number_fav, crypto_user_list, blog_url_list)
+            #Through each infinite loop post crypto-related post from Reddit (30% Chance of each occurring)
+            rand_int = random.randint(0,100)
+            if len(bit_url_list)>0 and rand_int<30:
+                post_twitter(bit_url_list, biz_word_list, crypto_words, crypto_user_list)
+                print("Tweeted URL from Reddit!")
+            elif rand_int>90:
+                crypto_follow(crypto_words, crypto_user_list)
                 print("Follow Crypto Posted!")
                 unfollow(crypto_user_list)
+                follow_accounts(crypto_user_list, num_to_follow, accts_unfollow_list)
             else:
-                fav_rt_timeline_tweets(usr_list, crypto_words, accts_unfollow_list, number_fav, crypto_user_list, blog_url_list)
-                post_twitter(blog_url_list, biz_word_list, crypto_words, crypto2_user_list)
-            #favorite(blockchain_usr_list, num_to_fav, accts_unfollow_list)
+                post_twitter(blog_url_list, biz_word_list, crypto_words, crypto_user_list)
+                print("Posted Blog URL to Twitter!")
         except:
             pass
 
-        try:
-            xpost_reddit(crypto_words, crosspost_title_list, sub_post_list, blog_url_list)
-            time.sleep(630)
-        except:
-            pass
+def write_file(list1, filename):
+    with open(filename, 'w') as f:
+        for user in list1:
+            f.write(user + "\n")
 
-        try:
-            #follow_accounts(crypto_user_list, num_to_follow, accts_unfollow_list)
-            xpost_reddit(crypto_words, crosspost_title_list, sub_post_list, blog_url_list)
-        except:
-            pass
-        time.sleep(random.randint(15,120))
-        #Post link to Blog every 1 in 5 loops
-        if random.randint(0,100)<20:
-            post_twitter(blog_url_list, biz_word_list, crypto_words, crypto2_user_list)
-        else:
-            fav_rt_timeline_tweets(usr_list, crypto_words, accts_unfollow_list, number_fav, crypto_user_list, blog_url_list)
-        time.sleep(random.randint(60, 360))      #sleep 20-30 minutes (random) through each iteration
+def read_file(filename1):
+    list1=[]
+    with open(filename1, 'r') as f1:
+        list1=list(f1.read().split('\n'))
+    return list1[:-1]
 
 def favorite(username_list, fav_num, user_ban_list):
     #Using Cursor format to access tweets for given screen name
@@ -330,7 +295,7 @@ def source_urls_reddit(subreddit_crosspost_list, bit_url_list):
     return bit_url_list
 
 def post_twitter(bit_url_list, biz_word_list, crypto_word_list, cc_list):
-    #post a URL from Subreddit to twitter with 2 hashtags
+    #post a URL from previously collected list to twitter with 2 hashtags & 2 Accounts CC'd
     url1=random.choice(bit_url_list)
     status=url1 + "\n \n via @BlockchainEng\n \n#" + random.choice(crypto_word_list) + " #" + random.choice(crypto_word_list)
     status += "\n \ncc: @" + random.choice(cc_list) + " @" + random.choice(cc_list)
@@ -338,6 +303,7 @@ def post_twitter(bit_url_list, biz_word_list, crypto_word_list, cc_list):
     print(status)
 
 def crypto_follow(crypto_word_list, crypto_usr_list):
+    #This Function posts a collection of high-value twitter accounts with 'Follow' statement attached
     usr_list = []
     while len(usr_list)<6:
         rand_usr = random.choice(crypto_usr_list)
